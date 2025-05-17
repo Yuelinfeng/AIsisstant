@@ -161,15 +161,16 @@ const initialFormData = ref({})
 const initialApiFormData = ref({})
 
 const isUserInput = computed(
-  () =>
-    props.applicationDetails.work_flow?.nodes?.filter((v: any) => v.id === 'base-node')[0]
-      .properties.user_input_field_list.length > 0
+  () => {
+    const baseNode = props.applicationDetails.work_flow?.nodes?.find((v: any) => v.id === 'base-node')
+    return baseNode?.properties?.user_input_field_list?.length > 0
+  }
 )
 const isAPIInput = computed(
-  () =>
-    props.type === 'debug-ai-chat' &&
-    props.applicationDetails.work_flow?.nodes?.filter((v: any) => v.id === 'base-node')[0]
-      .properties.api_input_field_list.length > 0
+  () => {
+    const baseNode = props.applicationDetails.work_flow?.nodes?.find((v: any) => v.id === 'base-node')
+    return props.type === 'debug-ai-chat' && baseNode?.properties?.api_input_field_list?.length > 0
+  }
 )
 const showUserInputContent = computed(() => {
   return (
