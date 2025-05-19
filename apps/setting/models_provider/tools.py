@@ -1,9 +1,9 @@
 # coding=utf-8
 """
-    @project: MaxKB
-    @Author：虎
+    @project: AIsisstant
+    @Author：Yue linfeng
     @file： tools.py
-    @date：2024/7/22 11:18
+    @date：2025/4/12 11:18
     @desc:
 """
 from django.db import connection

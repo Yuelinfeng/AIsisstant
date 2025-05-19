@@ -1,9 +1,9 @@
 # coding=utf-8
 """
-    @project: MaxKB
-    @Author：虎
+    @project: AIsisstant
+    @Author：Yue linfeng
     @file： model_apply_serializers.py
-    @date：2024/8/20 20:39
+    @date：2025/4/13 20:39
     @desc:
 """
 from django.db import connection

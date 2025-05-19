@@ -1,9 +1,9 @@
 # coding=utf-8
 """
-    @project: maxkb
-    @Author：虎
+    @project: AIsisstant
+    @Author：Yue linfeng
     @file： provider_serializers.py
-    @date：2023/11/2 14:01
+    @date：2025/4/13 14:01
     @desc:
 """
 import json

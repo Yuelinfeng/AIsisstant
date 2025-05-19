@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 """
-@Project ：MaxKB
-@File    ：__init__.py.py
-@Author  ：Brian Yang
-@Date    ：5/12/24 7:38 AM
+@Project ：AIsisstant
+@File    ：__init__.py
+@Author  ：Yue linfeng
+@Date    ：3/12/25 7:38 AM
 """

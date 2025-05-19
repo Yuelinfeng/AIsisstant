@@ -1,9 +1,9 @@
 # coding=utf-8
 """
-    @project: MaxKB
-    @Author：虎
+    @project: AIsisstant
+    @Author：Yue linfeng
     @file： llm.py
-    @date：2024/7/11 17:51
+    @date：2025/3/12 17:51
     @desc:
 """
 import traceback

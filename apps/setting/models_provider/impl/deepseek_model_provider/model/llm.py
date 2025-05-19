@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 """
-@Project ：MaxKB 
+@Project ：AIsisstant 
 @File    ：llm.py
-@Author  ：Brian Yang
-@Date    ：5/12/24 7:44 AM 
+@Author  ：Yue linfeng
+@Date    ：3/12/25 7:44 AM 
 """
 from typing import Dict
 

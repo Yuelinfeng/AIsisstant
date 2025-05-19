@@ -1,9 +1,9 @@
 # coding=utf-8
 """
-    @project: maxkb
-    @Author：虎
+    @project: AIsisstant
+    @Author：Yue linfeng
     @file： base_model_provider.py
-    @date：2023/10/31 16:19
+    @date：2025/4/12 16:19
     @desc:
 """
 from abc import ABC, abstractmethod

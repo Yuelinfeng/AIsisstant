@@ -1,9 +1,9 @@
 # coding=utf-8
 """
-    @project: maxkb
-    @Author：虎
-    @file： __init__.py.py
-    @date：2023/10/31 17:16
+    @project: AIsisstant
+    @Author：Yue linfeng
+    @file： __init__.py
+    @date：2025/4/12 17:16
     @desc:
 """
 import json
