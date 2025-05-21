@@ -30,81 +30,120 @@
         <h4>{{ applicationDetail?.name }}</h4>
       </div>
     </div>
-    <div>
-      <div class="flex">
-        <div class="chat-pc__left border-r">
-          <div class="p-24 pb-0">
-            <el-button class="add-button w-full primary" @click="newChat">
-              <el-icon>
-                <Plus />
-              </el-icon>
-              <span class="ml-4">{{ $t('chat.createChat') }}</span>
-            </el-button>
-            <p class="mt-20 mb-8">{{ $t('chat.history') }}</p>
-          </div>
-          <div class="left-height pt-0">
-            <el-scrollbar>
-              <div class="p-8 pt-0">
-                <common-list
-                  :style="{
-                    '--el-color-primary': applicationDetail?.custom_theme?.theme_color,
-                    '--el-color-primary-light-9': hexToRgba(
-                      applicationDetail?.custom_theme?.theme_color,
-                      0.1
-                    )
-                  }"
-                  :data="chatLogData"
-                  class="mt-8"
-                  v-loading="left_loading"
-                  :defaultActive="currentChatId"
-                  @click="clickListHandle"
-                  @mouseenter="mouseenter"
-                  @mouseleave="mouseId = ''"
-                >
-                  <template #default="{ row }">
-                    <div class="flex-between">
-                      <auto-tooltip :content="row.abstract">
-                        {{ row.abstract }}
-                      </auto-tooltip>
-                      <div @click.stop v-show="mouseId === row.id && row.id !== 'new'">
-                        <el-dropdown trigger="click" :teleported="false">
-                          <el-icon class="rotate-90 mt-4"><MoreFilled /></el-icon>
-                          <template #dropdown>
-                            <el-dropdown-menu>
-                              <el-dropdown-item @click.stop="editLogTitle(row)">
-                                <el-icon><EditPen /></el-icon>
-                                {{ $t('common.edit') }}
-                              </el-dropdown-item>
-                              <el-dropdown-item @click.stop="deleteLog(row)">
-                                <el-icon><Delete /></el-icon>
-                                {{ $t('common.delete') }}
-                              </el-dropdown-item>
-                            </el-dropdown-menu>
-                          </template>
-                        </el-dropdown>
+    <div class="chat-pc__main">
+      <div class="chat-pc__container">
+        <div class="chat-pc__left">
+          <div class="left-content">
+            <div class="p-24 pb-0">
+              <el-button class="add-button w-full primary" @click="newChat">
+                <el-icon><Plus /></el-icon>
+                <span class="ml-4">{{ $t('chat.createChat') }}</span>
+              </el-button>
+              <p class="mt-20 mb-8">{{ $t('chat.history') }}</p>
+            </div>
+            <div class="left-list">
+              <el-scrollbar>
+                <div class="p-8 pt-0">
+                  <common-list
+                    :style="{
+                      '--el-color-primary': applicationDetail?.custom_theme?.theme_color,
+                      '--el-color-primary-light-9': hexToRgba(
+                        applicationDetail?.custom_theme?.theme_color,
+                        0.1
+                      )
+                    }"
+                    :data="chatLogData"
+                    class="mt-8"
+                    v-loading="left_loading"
+                    :defaultActive="currentChatId"
+                    @click="clickListHandle"
+                    @mouseenter="mouseenter"
+                    @mouseleave="mouseId = ''"
+                  >
+                    <template #default="{ row }">
+                      <div class="flex-between">
+                        <auto-tooltip :content="row.abstract">
+                          {{ row.abstract }}
+                        </auto-tooltip>
+                        <div @click.stop v-show="mouseId === row.id && row.id !== 'new'">
+                          <el-dropdown trigger="click" :teleported="false">
+                            <el-icon class="rotate-90 mt-4"><MoreFilled /></el-icon>
+                            <template #dropdown>
+                              <el-dropdown-menu>
+                                <el-dropdown-item @click.stop="editLogTitle(row)">
+                                  <el-icon><EditPen /></el-icon>
+                                  {{ $t('common.edit') }}
+                                </el-dropdown-item>
+                                <el-dropdown-item @click.stop="deleteLog(row)">
+                                  <el-icon><Delete /></el-icon>
+                                  {{ $t('common.delete') }}
+                                </el-dropdown-item>
+                              </el-dropdown-menu>
+                            </template>
+                          </el-dropdown>
+                        </div>
                       </div>
-                    </div>
-                  </template>
+                    </template>
 
-                  <template #empty>
-                    <div class="text-center">
-                      <el-text type="info">{{ $t('chat.noHistory') }}</el-text>
-                    </div>
-                  </template>
-                </common-list>
+                    <template #empty>
+                      <div class="text-center">
+                        <el-text type="info">{{ $t('chat.noHistory') }}</el-text>
+                      </div>
+                    </template>
+                  </common-list>
+                </div>
+                <div v-if="chatLogData?.length" class="gradient-divider lighter mt-8">
+                  <span>{{ $t('chat.only20history') }}</span>
+                </div>
+              </el-scrollbar>
+            </div>
+          </div>
+        </div>
+        <div class="chat-pc__code-editor">
+          <div class="code-editor-header">
+            <div class="flex align-center justify-between">
+              <div class="flex align-center">
+                <el-select v-model="selectedLanguage" class="mr-16" style="width: 120px">
+                  <el-option
+                    v-for="lang in supportedLanguages"
+                    :key="lang.value"
+                    :label="lang.label"
+                    :value="lang.value"
+                  />
+                </el-select>
               </div>
-              <div v-if="chatLogData?.length" class="gradient-divider lighter mt-8">
-                <span>{{ $t('chat.only20history') }}</span>
-              </div>
-            </el-scrollbar>
+              <el-button type="primary" @click="runCode" :loading="running">
+                <el-icon><VideoPlay /></el-icon>
+                <span class="ml-4">运行代码</span>
+              </el-button>
+            </div>
+          </div>
+          <div class="code-editor-content">
+            <monaco-editor
+              v-model="code"
+              :language="selectedLanguage"
+              :options="editorOptions"
+              @change="onCodeChange"
+            />
+          </div>
+          <div class="code-output" v-if="output">
+            <div class="output-header">
+              <h4>运行结果</h4>
+              <el-button type="text" @click="clearOutput">
+                <el-icon><Delete /></el-icon>
+                <span class="ml-4">清除</span>
+              </el-button>
+            </div>
+            <div class="output-content">
+              <pre>{{ output }}</pre>
+            </div>
           </div>
         </div>
         <div class="chat-pc__right">
-          <div class="right-header border-b mb-24 p-16-24 flex-between">
+          <div class="right-header">
             <h4 class="ellipsis-1" style="width: 66%">
               {{ currentChatName }}
             </h4>
-
             <span class="flex align-center" v-if="currentRecordList.length">
               <AppIcon
                 v-if="paginationConfig.total"
@@ -134,7 +173,7 @@
               </el-dropdown>
             </span>
           </div>
-          <div class="right-height chat-width">
+          <div class="right-content">
             <AiChat
               ref="AiChatRef"
               v-model:applicationDetails="applicationDetail"
@@ -149,11 +188,6 @@
             </AiChat>
           </div>
         </div>
-      </div>
-      <div class="collapse">
-        <el-button @click="isCollapse = !isCollapse">
-          <el-icon> <component :is="isCollapse ? 'Fold' : 'Expand'" /></el-icon>
-        </el-button>
       </div>
     </div>
     <EditTitleDialog ref="EditTitleDialogRef" @refresh="refreshFieldTitle" />
@@ -170,6 +204,10 @@ import useResize from '@/layout/hooks/useResize'
 import { hexToRgba } from '@/utils/theme'
 import EditTitleDialog from './EditTitleDialog.vue'
 import { t } from '@/locales'
+import MonacoEditor from '@/components/MonacoEditor.vue'
+import { VideoPlay, Delete } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
+
 useResize()
 
 const { user, log, common } = useStore()
@@ -224,6 +262,68 @@ const currentRecordList = ref<any>([])
 const currentChatId = ref('new') // 当前历史记录Id 默认为'new'
 const currentChatName = ref(t('chat.createChat'))
 const mouseId = ref('')
+
+// 代码编辑器相关
+const code = ref('')
+const output = ref('')
+const running = ref(false)
+const selectedLanguage = ref('python')
+
+const supportedLanguages = [
+  { label: 'Python', value: 'python' },
+  { label: 'Java', value: 'java' },
+  { label: 'C++', value: 'cpp' },
+  { label: 'JavaScript', value: 'javascript' },
+  { label: 'TypeScript', value: 'typescript' }
+]
+
+const editorOptions = {
+  theme: 'vs-dark',
+  fontSize: 14,
+  minimap: { enabled: false },
+  scrollBeyondLastLine: false,
+  automaticLayout: true
+}
+
+const onCodeChange = (value: string) => {
+  code.value = value
+}
+
+const clearOutput = () => {
+  output.value = ''
+}
+
+const runCode = async () => {
+  if (!code.value.trim()) {
+    ElMessage.warning('请输入代码')
+    return
+  }
+  
+  running.value = true
+  try {
+    const response = await fetch('/api/code/run', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        code: code.value,
+        language: selectedLanguage.value
+      })
+    })
+    
+    const result = await response.json()
+    if (result.error) {
+      output.value = `错误: ${result.error}`
+    } else {
+      output.value = result.output || '代码执行成功，但没有输出'
+    }
+  } catch (error: any) {
+    output.value = `运行出错: ${error.message || '未知错误'}`
+  } finally {
+    running.value = false
+  }
+}
 
 function mouseenter(row: any) {
   mouseId.value = row.id
@@ -401,49 +501,125 @@ onMounted(() => {
 </script>
 <style lang="scss">
 .chat-pc {
-  overflow: hidden;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--app-bg-color);
 
   &__header {
-    background: var(--app-header-bg-color);
-    position: fixed;
-    width: 100%;
-    left: 0;
-    top: 0;
-    z-index: 100;
     height: var(--app-header-height);
-    line-height: var(--app-header-height);
-    box-sizing: border-box;
+    background: var(--app-header-bg-color);
     border-bottom: 1px solid var(--el-border-color);
+    flex-shrink: 0;
+  }
+
+  &__main {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+  }
+
+  &__container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
   }
 
   &__left {
-    padding-top: calc(var(--app-header-height) - 8px);
-    background: #ffffff;
     width: 280px;
+    background: #fff;
+    border-right: 1px solid var(--el-border-color);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
 
-    .add-button {
-      border: 1px solid var(--el-color-primary);
+    .left-content {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
     }
 
-    .left-height {
-      height: calc(100vh - var(--app-header-height) - 135px);
+    .left-list {
+      flex: 1;
+      overflow: hidden;
+    }
+  }
+
+  &__code-editor {
+    width: 400px;
+    background: #fff;
+    border-right: 1px solid var(--el-border-color);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+
+    .code-editor-header {
+      padding: 16px;
+      border-bottom: 1px solid var(--el-border-color);
+      flex-shrink: 0;
+    }
+
+    .code-editor-content {
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .code-output {
+      height: 200px;
+      border-top: 1px solid var(--el-border-color);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+
+      .output-header {
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--el-border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #f5f7fa;
+
+        h4 {
+          margin: 0;
+          font-size: 14px;
+        }
+      }
+
+      .output-content {
+        flex: 1;
+        overflow: auto;
+        padding: 16px;
+
+        pre {
+          margin: 0;
+          white-space: pre-wrap;
+          word-wrap: break-word;
+        }
+      }
     }
   }
 
   &__right {
-    width: calc(100% - 280px);
-    padding-top: calc(var(--app-header-height));
-    overflow: hidden;
-    position: relative;
-    box-sizing: border-box;
+    flex: 1;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
 
     .right-header {
-      background: #ffffff;
-      box-sizing: border-box;
+      padding: 16px;
+      border-bottom: 1px solid var(--el-border-color);
+      flex-shrink: 0;
     }
 
-    .right-height {
-      height: calc(100vh - var(--app-header-height) * 2 - 24px);
+    .right-content {
+      flex: 1;
+      overflow: hidden;
+      position: relative;
     }
   }
 
@@ -477,15 +653,37 @@ onMounted(() => {
     display: none;
   }
 }
-// 适配移动端
+
+// 移动端适配
 .mobile {
   .chat-pc {
+    &__container {
+      flex-direction: column;
+    }
+
+    &__left {
+      width: 100%;
+      height: 100%;
+      display: none;
+
+      &.show {
+        display: flex;
+      }
+    }
+
+    &__code-editor {
+      width: 100%;
+      height: 100%;
+      display: none;
+
+      &.show {
+        display: flex;
+      }
+    }
+
     &__right {
       width: 100%;
-    }
-    &__left {
-      display: none;
-      width: 0;
+      height: 100%;
     }
   }
   .collapse {
@@ -501,7 +699,7 @@ onMounted(() => {
         position: fixed;
         width: 100%;
         z-index: 99;
-        height: calc(100vh - var(--app-header-height) + 6px);
+        height: calc(100vh - var(--app-header-height));
       }
     }
     .collapse {
