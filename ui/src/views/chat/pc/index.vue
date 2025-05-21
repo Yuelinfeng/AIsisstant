@@ -301,25 +301,65 @@ const runCode = async () => {
   
   running.value = true
   try {
-    const response = await fetch('/api/code/run', {
+    // 根据选择的语言设置 Piston 的语言
+    const languageMap: { [key: string]: string } = {
+      'python': 'python',
+      'java': 'java',
+      'cpp': 'cpp',
+      'javascript': 'javascript',
+      'typescript': 'typescript'
+    }
+
+    const language = languageMap[selectedLanguage.value]
+    if (!language) {
+      throw new Error('不支持该编程语言')
+    }
+
+    // 使用 Piston API
+    const response = await fetch('https://emkc.org/api/v2/piston/execute', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        code: code.value,
-        language: selectedLanguage.value
+        language: language,
+        version: '*',
+        files: [
+          {
+            name: `main.${language === 'python' ? 'py' : language === 'javascript' ? 'js' : language === 'typescript' ? 'ts' : language === 'java' ? 'java' : 'cpp'}`,
+            content: code.value
+          }
+        ],
+        stdin: '',
+        args: []
       })
     })
     
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+    
     const result = await response.json()
-    if (result.error) {
-      output.value = `错误: ${result.error}`
+    console.log('API 返回结果:', result)
+
+    if (result.run) {
+      if (result.run.stderr) {
+        output.value = `错误: ${result.run.stderr}`
+        ElMessage.error('代码执行出错')
+      } else if (result.run.stdout) {
+        output.value = result.run.stdout
+        ElMessage.success('代码执行成功')
+      } else {
+        output.value = '代码执行成功，但没有输出'
+        ElMessage.warning('代码执行成功，但没有输出')
+      }
     } else {
-      output.value = result.output || '代码执行成功，但没有输出'
+      throw new Error('执行结果格式错误')
     }
   } catch (error: any) {
+    console.error('运行代码出错:', error)
     output.value = `运行出错: ${error.message || '未知错误'}`
+    ElMessage.error('运行代码时发生错误')
   } finally {
     running.value = false
   }
