@@ -1,5 +1,5 @@
 #!/bin/bash
-rm -f /opt/maxkb/app/tmp/*.pid
+rm -f /opt/aisisstant/app/tmp/*.pid
 # Start postgresql
 docker-entrypoint.sh postgres -c max_connections=${POSTGRES_MAX_CONNECTIONS} &
 sleep 10
@@ -7,4 +7,4 @@ sleep 10
 until pg_isready --host=127.0.0.1; do sleep 1 && echo "waiting for postgres"; done
 
 # Start MaxKB
-python /opt/maxkb/app/main.py start
+python /opt/aisisstant/app/main.py start
